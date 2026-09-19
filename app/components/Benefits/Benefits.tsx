@@ -12,7 +12,7 @@ export default function Benefits() {
         transition: { duration: 0.5 }
     };
     return (
-        <div id='benefits'>
+        <div id='benefits' className="">
             <div className="flex flex-wrap justify-center gap-2 lg:gap-4 pt-24 pb-2 ">
                 {
                     ourBenefits.map((char, index) => (
@@ -109,7 +109,7 @@ export default function Benefits() {
 
                 <motion.img
                     {...scrollAnimation}
-                    src="/bottle.png" alt="Benefits Image" className="w-full" />
+                    src="/bottle.png" alt="Benefits Image" className="w-full " />
             </div>
         </div>
 
