@@ -3,14 +3,19 @@ import Image from "next/image";
 import ProductShowCase from "./components/ProductShowCase/ProductShowCase";
 import HeroSection from "./components/HeroSection/HeroSection";
 import Benefits from "./components/Benefits/Benefits";
+import About from "./components/About/About";
+
+
 
 export default function Home() {
+
   return (
     <div>
       <HeroSection />
       <InfoBoxes />
       <Benefits />
       <ProductShowCase />
+      <About />
     </div>
   );
 }
