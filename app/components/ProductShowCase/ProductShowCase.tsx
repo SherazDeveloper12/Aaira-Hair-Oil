@@ -2,15 +2,23 @@
 import React from 'react'
 import { motion } from 'motion/react'
 import { Check, Minus, Plus, ShoppingBag, ShoppingCart } from 'lucide-react'
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { addItemToCart, toggleCart } from '@/app/store/slices/cart';
 export default function ProductShowCase() {
   const products = useSelector((state: any) => state.products.Products);
   const hairoil = products.find((product: any) => product._id === '6ab0b22f2607dc6100c89403');
-
+  const dispatch = useDispatch();
   console.log('hairoil', hairoil);
   const [quantity, setQuantity] = React.useState(1);
   const add = () => setQuantity(prev => prev + 1);
-  
+  const handleAddToCart = () => {
+    dispatch(addItemToCart({
+      product: hairoil,
+      quantity: 1
+    }));
+    dispatch(toggleCart());
+
+  }
   return (
     <section id="product" className="overflow-hidden bg-[#0b0b0a] px-6 py-24 text-white md:px-10 md:py-32">
       <div className="mx-auto grid max-w-7xl items-center gap-16 md:grid-cols-2">
@@ -85,7 +93,7 @@ export default function ProductShowCase() {
             <div className="ml-auto flex items-center rounded-full border border-white/20">
               <button onClick={add} className="flex w-full items-center justify-center gap-2 rounded-full bg-[#d5a044] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.16em] text-black transition hover:bg-[#efc16a] sm:w-auto">
                 <ShoppingCart size={15} />
-               Purchase Now
+                Purchase Now
               </button>
               {/* <button onClick={() => dispatch(removeProduct())} aria-label="Remove one" className="p-3 text-white/70 transition hover:text-white">
                 <Minus size={15} />
@@ -97,14 +105,16 @@ export default function ProductShowCase() {
                 <Plus size={15} />
               </button> */}
             </div>
-            <button onClick={add} className="flex w-full items-center justify-center gap-2 rounded-full border border-white/20 px-6 py-3.5 text-xs font-bold uppercase hover:text-primary hover:border-primary cursor-pointer tracking-[0.16em]  transition  sm:w-auto">
+            <button 
+            onClick={handleAddToCart}
+            className="flex w-full items-center justify-center gap-2 rounded-full border border-white/20 px-6 py-3.5 text-xs font-bold uppercase hover:text-primary hover:border-primary cursor-pointer tracking-[0.16em]  transition  sm:w-auto">
               <ShoppingBag size={15} />
               Add to bag
             </button>
           </div>
         </div>
       </div>
-    </section>
+    </section >
 
   )
 }
