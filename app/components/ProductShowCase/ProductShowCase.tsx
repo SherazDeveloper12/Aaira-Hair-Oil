@@ -11,12 +11,13 @@ export default function ProductShowCase() {
   console.log('hairoil', hairoil);
   const [quantity, setQuantity] = React.useState(1);
   const add = () => setQuantity(prev => prev + 1);
+  const subtract = () => setQuantity(prev => prev > 1 ? prev - 1 : 1);
   const handleAddToCart = () => {
     dispatch(addItemToCart({
       product: hairoil,
-      quantity: 1
+      quantity: quantity
     }));
-    dispatch(toggleCart());
+    
 
   }
   return (
@@ -39,7 +40,7 @@ export default function ProductShowCase() {
           }
           {hairoil &&
             <p className="max-w-md text-base leading-7 text-white/60">
-              {hairoil.description}
+              {hairoil.description.substring(0, 100)} {hairoil.description.length > 100 ? '...' : ''}
             </p>
           }
 
@@ -79,7 +80,7 @@ export default function ProductShowCase() {
 
                 {hairoil && hairoil.discount !== 0 &&
                   <p className={` text-2xl font-semibold ${hairoil.discount || hairoil.discount !== 0 ? '' : 'hidden'} `}>
-                    PKR 1,000
+                    PKR {hairoil.payableAmount}
                     <span className="text-sm font-normal text-white/40">
                       / 100ml</span>
                   </p>
@@ -90,24 +91,21 @@ export default function ProductShowCase() {
 
           </div>
           <div className="  flex flex-wrap items-center gap-5 border-t border-white/15 pt-7">
-            <div className="ml-auto flex items-center rounded-full border border-white/20">
-              <button onClick={add} className="flex w-full items-center justify-center gap-2 rounded-full bg-[#d5a044] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.16em] text-black transition hover:bg-[#efc16a] sm:w-auto">
-                <ShoppingCart size={15} />
-                Purchase Now
-              </button>
-              {/* <button onClick={() => dispatch(removeProduct())} aria-label="Remove one" className="p-3 text-white/70 transition hover:text-white">
+            <div className="ml-auto flex items-center rounded-full border border-white/20 hover:border-primary transition duration-300">
+              <button
+                onClick={subtract} aria-label="Remove one"
+                className="p-3 text-white/70 transition hover:text-primary cursor-pointer duration-300">
                 <Minus size={15} />
               </button>
-              <span className="min-w-6 text-center text-sm">
-                {quantity}
-              </span>
-              <button onClick={add} aria-label="Add one" className="p-3 text-white/70 transition hover:text-white">
+              <span className="min-w-6 text-center text-sm">{quantity}</span>
+              <button onClick={add} aria-label="Add one" className="p-3 text-white/70 cursor-pointer duration-300 transition hover:text-primary">
                 <Plus size={15} />
-              </button> */}
+              </button>
+
             </div>
-            <button 
-            onClick={handleAddToCart}
-            className="flex w-full items-center justify-center gap-2 rounded-full border border-white/20 px-6 py-3.5 text-xs font-bold uppercase hover:text-primary hover:border-primary cursor-pointer tracking-[0.16em]  transition  sm:w-auto">
+            <button
+              onClick={handleAddToCart}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-[#d5a044] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.16em] text-black transition hover:bg-[#efc16a] sm:w-auto cursor-pointer">
               <ShoppingBag size={15} />
               Add to bag
             </button>

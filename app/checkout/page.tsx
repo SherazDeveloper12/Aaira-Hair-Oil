@@ -1,7 +1,334 @@
-import React from 'react'
+'use client'
+import { create, nav } from 'motion/react-m';
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+// import { toast, Toaster } from 'sonner';
+// import { useNavigate } from 'react-router';
+import { createOrder, fetchOrdersbyuserid } from '../store/slices/order';
 
-export default function page() {
-  return (
-    <div>page</div>
-  )
+import { useRouter } from 'next/navigation';
+import { clearCart, fetchCartFromStorage } from '../store/slices/cart';
+import { setUser, validateCouponCode } from '../store/slices/auth';
+import type { RootState } from '../store/store';
+import { fetchProducts } from '../store/slices/product';
+import ImageUploader from '../components/ImageUploader/ImageUploader';
+
+
+type CartItem = {
+    product: {
+        id: number;
+        name: string;
+        image: any;
+        price: number;
+    };
+    quantity: number;
+};
+
+export default function Checkout() {
+    useEffect(() => {
+        dispatch(setUser());
+        dispatch(fetchProducts());
+        dispatch(fetchCartFromStorage());
+        return () => {
+
+        }
+    }, []);
+    const deliveryCharges = useSelector((state: RootState) => state.auth.deliveryCharges);
+    const paymentMethods = useSelector((state: RootState) => state.auth.paymentMethods);
+    console.log('Payment Methods from Redux:', paymentMethods);
+    const items = useSelector((state: RootState) => state.cart.items) as CartItem[];
+    const [SameBillingAddress, setSameBillingAddress] = useState(true);
+
+    const [email, setEmail] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [fullName, setFullName] = useState('');
+    const [addressLine1, setAddressLine1] = useState('');
+    const [city, setCity] = useState('');
+    const [stateProvince, setStateProvince] = useState('');
+    const [postalZipCode, setPostalZipCode] = useState('');
+    const [country, setCountry] = useState('');
+    const [billingFullName, setBillingFullName] = useState('');
+    const [billingAddressLine1, setBillingAddressLine1] = useState('');
+    const [billingCity, setBillingCity] = useState('');
+    const [billingStateProvince, setBillingStateProvince] = useState('');
+    const [billingPostalZipCode, setBillingPostalZipCode] = useState('');
+    const [billingCountry, setBillingCountry] = useState('');
+    const [paymentMethod, setPaymentMethod] = useState('');
+
+    const [paymentReceipt, setPaymentReceipt] = useState('');
+    const [couponCode, setCouponCode] = useState('');
+    const _id = useSelector((state) => state.auth.user_id);
+
+    const dispatch = useDispatch();
+    const router = useRouter();
+    const { status } = useSelector((state) => state.orders);
+    const [requiredFieldsFilled, setRequiredFieldsFilled] = useState(false);
+
+    const couponDiscount = useSelector((state: RootState) => state.auth.couponDiscount);
+
+
+
+    const handlePlaceOrder = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        let orderDetails = {
+            username: `Guest`,
+            userid: _id,
+            email,
+            phoneNumber,
+            shippingAddress: {
+                fullName,
+                addressLine1,
+                city,
+                stateProvince,
+                postalZipCode,
+                country,
+            },
+            billingAddress: SameBillingAddress ? {
+                fullName,
+                addressLine1,
+                city,
+                stateProvince,
+                postalZipCode,
+                country,
+            } : {
+                fullName: billingFullName,
+                addressLine1: billingAddressLine1,
+                city: billingCity,
+                stateProvince: billingStateProvince,
+                postalZipCode: billingPostalZipCode,
+                country: billingCountry,
+            },
+            couponCode,
+            paymentMethod: paymentMethods[paymentMethod].type,
+            paymentReceipt,
+            items,
+            storeID: '6a7a2a19f8e85aac2049511c',
+
+
+        };
+        if (couponCode) {
+
+        }
+
+        if (paymentMethods[paymentMethod].type === "cod") {
+            setRequiredFieldsFilled(false);
+            dispatch(createOrder(orderDetails));
+        }
+        else {
+            if (paymentReceipt === "") {
+                console.log('Please select a payment method.');
+                setRequiredFieldsFilled(true);
+                alert('Please Upload the payment receipt.');
+                return;
+            }
+            else {
+                setRequiredFieldsFilled(false);
+                orderDetails = {
+                    ...orderDetails,
+                    paymentReceipt,
+                };
+                dispatch(createOrder(orderDetails));
+
+
+
+            }
+
+        }
+        setEmail('');
+        setPhoneNumber('');
+        setFullName('');
+        setAddressLine1('');
+        setCity('');
+        setStateProvince('');
+        setPostalZipCode('');
+        setCountry('');
+        setBillingFullName('');
+        setBillingAddressLine1('');
+        setBillingCity('');
+        setBillingStateProvince('');
+        setBillingPostalZipCode('');
+        setBillingCountry('');
+        setPaymentMethod('');
+    };
+
+
+    const handleApplyCoupon = (couponCode: string) => {
+        dispatch(validateCouponCode(couponCode));
+
+    }
+
+
+    useEffect(() => {
+        if (status === 'succeeded') {
+            dispatch(clearCart());
+            dispatch(fetchOrdersbyuserid(_id));
+            router.push('/order', { replace: true });
+        }
+
+    }, [status]);
+
+
+    return (
+        <div className='flex flex-col  '>
+            <div
+                onClick={() => router.push('/')}
+                className='flex gap-2 items-center cursor-pointer bg-secondary/30 border-b border-textColor/30 '
+                >
+                <img src='/logo.png' alt='Logo' className='size-16 mx-4 m-1 object-contain  cursor-pointer' />
+                <h1 className='text-2xl font-bold text-primary' >Aaira Hair Oil</h1>
+            </div>
+
+
+            <div className=' flex md:flex-row flex-col-reverse '>
+              
+                <div className='flex-1 flex flex-col gap-3 p-8'>
+                    <h2 className='text-2xl font-semibold mb-4'>Shipping Information</h2>
+                    <form
+                        onSubmit={handlePlaceOrder}>
+                        <div>
+                            <h2 className='text-xl  mb-2'>Contact</h2>
+                            <input type='email' required placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} className='border border-neutral-500 rounded p-2 w-full mb-3  ' />
+                            <input type='text' required placeholder='Phone Number' value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className='border border-neutral-500 rounded p-2 w-full mb-3  ' />
+                        </div>
+                        <div>
+                            <h2 className='text-xl  mb-2'>Shipping Address</h2>
+                            <input type='text' required placeholder='Full Name' value={fullName} onChange={(e) => setFullName(e.target.value)} className='border border-neutral-500 rounded p-2 w-full mb-3  ' />
+                            <input type='text' required placeholder='Address Line 1' value={addressLine1} onChange={(e) => setAddressLine1(e.target.value)} className='border border-neutral-500 rounded p-2 w-full mb-3  ' />
+                            <div className='flex gap-3 mb-3'>
+                                <input type='text' required placeholder='City' value={city} onChange={(e) => setCity(e.target.value)} className='border border-neutral-500 rounded p-2 w-full  ' />
+                                <input type='text' required placeholder='State/Province' value={stateProvince} onChange={(e) => setStateProvince(e.target.value)} className='border border-neutral-500 rounded p-2 w-full  ' />
+                            </div>
+                            <input type='text' required placeholder='Postal/Zip Code' value={postalZipCode} onChange={(e) => setPostalZipCode(e.target.value)} className='border border-neutral-500 rounded p-2 w-full mb-3  ' />
+                            <input type='text' required placeholder='Country' value={country} onChange={(e) => setCountry(e.target.value)} className='border border-neutral-500 rounded p-2 w-full mb-3  ' />
+                        </div>
+                        <div>
+                            <h2 className='text-xl  mb-2'>Billing Address</h2>
+                            <input type="checkbox" id='SameAsShippingAddress' defaultChecked={SameBillingAddress} onChange={() => setSameBillingAddress(!SameBillingAddress)} />
+                            <label htmlFor='SameAsShippingAddress' className='ml-2'>Same as shipping address</label>
+                            {!SameBillingAddress && (
+                                <div className='mt-3'>
+                                    <input type='text' required placeholder='Full Name' value={billingFullName} onChange={(e) => setBillingFullName(e.target.value)} className='border border-neutral-500 rounded p-2 w-full mb-3 ' />
+                                    <input type='text' required placeholder='Address Line 1' value={billingAddressLine1} onChange={(e) => setBillingAddressLine1(e.target.value)} className='border border-neutral-500 rounded p-2 w-full mb-3  ' />
+                                    <div className='flex gap-3 mb-3'>
+                                        <input type='text' required placeholder='City' value={billingCity} onChange={(e) => setBillingCity(e.target.value)} className='border border-neutral-500 rounded p-2 w-full  ' />
+                                        <input type='text' required placeholder='State/Province' value={billingStateProvince} onChange={(e) => setBillingStateProvince(e.target.value)} className='border border-neutral-500 rounded p-2 w-full  ' />
+                                    </div>
+                                    <input type='text' required placeholder='Postal/Zip Code' value={billingPostalZipCode} onChange={(e) => setBillingPostalZipCode(e.target.value)} className='border border-neutral-500 rounded
+                                    p-2 w-full mb-3  ' />
+                                    <input type='text' required placeholder='Country' value={billingCountry} onChange={(e) => setBillingCountry(e.target.value)} className='border border-neutral-500 rounded p-2 w-full mb-3 ' />
+                                </div>
+                            )}
+                        </div>
+                        <div>
+                            <h2 className='text-xl mb-2'>Payment Method</h2>
+                            <div className='flex flex-col justify-center items-start gap-2 w-full'>
+                                {paymentMethods.map((method, idx) => (
+                                    <div key={idx} className="w-full" >
+                                        <input required type="radio" id={idx} name='paymentMethod' onChange={() => setPaymentMethod(idx)} className='mr-2' />
+                                        <label htmlFor={idx}>{method.type}</label>
+                                        {paymentMethod === idx && paymentMethods[paymentMethod].type !== 'cod' &&
+                                            <div className=' p-3 rounded mt-2 border border-neutral-500 w-full flex flex-col gap-2'>
+                                                <p className='text-sm text-gray-400'>Do payment at the given account and Upload Receipt</p>
+                                                <p className='text-sm text-gray-400 '>Account:   <span className='text-black  font-semibold'> {method.type.charAt(0).toUpperCase() + method.type.slice(1)}</span></p>
+                                                {paymentMethod === idx && method.type === 'bank_transfer' &&
+                                                    <p className='text-sm  text-gray-400'>Bank Name: <span className='text-black  font-semibold'> {method.bankName}</span></p>
+                                                }
+
+                                                <p className='text-sm  text-gray-400'>Account Title: <span className='text-black font-semibold'> {method.accountName}</span></p>
+                                                <p className='text-sm  text-gray-400'>Account Number: <span className='text-black  font-semibold'> {method.accountNumber}</span></p>
+                                                <div>
+                                                    <ImageUploader value={paymentReceipt} setValue={setPaymentReceipt} required={requiredFieldsFilled} size="md" />
+                                                </div>
+
+
+                                            </div>}
+                                    </div>
+                                ))}
+
+
+                            </div>
+                        </div>
+                        <div>
+                            <button
+                                type="submit"
+                                className='bg-primary/90 text-white px-4 py-2 rounded w-full cursor-pointer hover:bg-primary mt-4'>Place Order</button>
+                        </div>
+                    </form>
+                </div>
+                <div className='flex-1 p-8  border-l border-textColor/30 bg-secondary/30'>
+                    {items.length === 0 ? (
+                        <div className='text-center text-gray-500'>Your cart is empty.</div>
+                    ) : (
+                        <div className='flex flex-col gap-3 pb-3 '>
+                            <h2 className='text-2xl font-bold mb-4'>Checkout</h2>
+                            <ul className='flex flex-col gap-4'>
+                                {items.map((item) => (
+                                    <li key={item.product._id} className='flex gap-3 bg-white p-3 rounded items-center'>
+                                        <div className='flex-1'>
+                                            <img
+                                                src={item.product.img[0]}
+                                                alt={item.product.heading}
+                                                className='w-20 h-20 object-fit border border-neutral-500 rounded'
+                                            />
+                                        </div>
+                                        <div className='flex-3'>
+                                            <div className='font-semibold'>{item.product.heading}</div>
+                                            <div>Quantity: {item.quantity}</div>
+
+                                        </div>
+                                        <div className='flex-2'>  {item.product.payableAmount} PKR</div>
+                                    </li>
+                                ))}
+                            </ul>
+                            <div className='flex flex-col gap-2 mt-4 border-t border-neutral-500 pt-4'>
+                                <div className=''>
+                                    <div className='flex justify-between items-center'>
+                                        <p>Total Items:</p>
+                                        <p> {items.reduce((total, item) => total + item.quantity, 0)}</p>
+                                    </div>
+                                    <div className='flex justify-between items-center'>
+                                        <p>Total Items Cost: </p>
+                                        <p>{items.reduce((total, item) => total + item.product.payableAmount * item.quantity, 0)} PKR</p>
+                                    </div>
+                                    <div className='flex justify-between items-center'>
+                                        <p>Delievery Charges: </p>
+                                        <p> {deliveryCharges} PKR</p>
+                                    </div>
+                                    <div className={` ${couponDiscount ? "line-through " : ""} flex justify-between items-center font-semibold text-lg`}>
+                                        <p>Total Payable Ammount: </p>
+                                        <p>{items.reduce((total, item) => total + item.product.payableAmount * item.quantity, 0) + deliveryCharges} PKR</p>
+                                    </div>
+                                    <div className='flex justify-between items-center'>
+                                        <p>Payment Status: </p>
+                                        <p>{paymentReceipt === "" ? "Unpaid" : "Paid"}</p>
+                                    </div>
+                                </div>
+                                {couponDiscount ?
+                                    <>
+                                        <div className='flex justify-between items-center bg-green-500 text-white px-4 py-1 rounded flex-1 cursor-pointer hover:bg-green-700 w-full'>
+                                            <p>Coupon Discount: </p>
+                                            <p>{Math.round((items.reduce((total, item) => total + item.product.payableAmount * item.quantity, 0)) * (couponDiscount / 100))} PKR</p>
+                                        </div>
+                                    </>
+                                    :
+                                    <form onSubmit={(e) => { e.preventDefault(); handleApplyCoupon(couponCode); }} className='flex gap-2 w-full'>
+                                        <input required value={couponCode} onChange={(e) => setCouponCode(e.target.value)} type="text" placeholder='Apply Coupon' className='border border-neutral-500 rounded p-2 flex-3 bg-white w-full ' />
+                                        <button
+                                            type="submit"
+                                            className='bg-primary/90 text-white px-4 py-1 rounded flex-1 cursor-pointer hover:bg-primary w-full'>Apply</button>
+                                    </form>}
+                                <div className={` ${couponDiscount ? " " : ""} flex justify-between items-center font-semibold text-lg`}>
+                                    <p>Total Payable Ammount: </p>
+                                    <p>{Math.round(items.reduce((total, item) => total + item.product.payableAmount * item.quantity, 0) + deliveryCharges - (items.reduce((total, item) => total + item.product.payableAmount * item.quantity, 0)) * (couponDiscount / 100))} PKR</p>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    )
 }

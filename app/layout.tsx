@@ -7,6 +7,7 @@ import InfoShowCase from "./components/InfoShowcase/InfoShowCase";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 import Cart from "./components/Cart/Cart";
+import ApiCalls from "./components/ApiCalls/ApiCalls";
 
 
 export const metadata: Metadata = {
@@ -22,11 +23,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <StoreProvider>
         <body className="min-h-full  font-primary ">
-          <InfoShowCase/>
-          <Header/>
-          <Cart/>
-          {children}
-          <Footer/>
+          <ApiCalls />
+         {children}
         </body>
       </StoreProvider>
     </html>

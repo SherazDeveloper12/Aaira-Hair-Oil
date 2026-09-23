@@ -15,7 +15,7 @@ export default function Cart() {
     dispatch(fetchCartFromStorage());
   }, [])
   const items = useSelector((state: any) => state.cart.items);
-
+  console.log('cart items', items)
 
 
   const dispatch = useDispatch()
@@ -63,8 +63,8 @@ export default function Cart() {
                           <div className='flex-1 flex flex-col justify-center'>
                             <h3 className='lg:font-semibold'>{item.product.heading}</h3>
                             <div className='flex  items-center gap-1'> <p>{item.quantity}</p> <p>X</p>
-                              <p className=''>{item.product.price} =</p>
-                              <p className='font-semibold text-amber-600'>{item.quantity * item.product.price} PKR</p>
+                              <p className=''>{item.product.payableAmount} =</p>
+                              <p className='font-semibold text-amber-600'>{item.quantity * item.product.payableAmount} PKR</p>
 
                             </div>
                           </div>
@@ -88,7 +88,7 @@ export default function Cart() {
                         <p>Total Items: {items.length}</p>
                         <div className='flex gap-1 lg:gap-2'>
                           <p>Items Cost:</p>
-                          <p className='font-semibold text-amber-600'>{items.reduce((total, item) => total + item.quantity * item.product.price, 0)} PKR</p>
+                          <p className='font-semibold text-amber-600'>{items.reduce((total, item) => total + item.quantity * item.product.payableAmount, 0)} PKR</p>
 
                         </div>
                       </div>

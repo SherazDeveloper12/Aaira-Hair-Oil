@@ -32,8 +32,17 @@ export const CartSlice = createSlice({
                 if (!existingItem) {
                     state.items.unshift(newItem);
                 }
+               
+                else if (existingItem.quantity !== newItem.quantity) {
+                    console.log('Updating quantity for existing item:', existingItem);
+
+                    existingItem.quantity = newItem.quantity;
+                    localStorage.setItem("cartItems", JSON.stringify(state.items));
+                   
+                }
                 localStorage.setItem("cartItems", JSON.stringify(state.items));
                 console.log('Updated Items:', state.items);
+                state.cartIsOpen = true;
             }
             else {
                 state.items = [newItem];
